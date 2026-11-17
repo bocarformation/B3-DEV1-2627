@@ -1,25 +1,50 @@
-// LIVE D - DÉPART (ce qui est à l'écran au début)
-// Le service de rappel (métier) fabrique lui-même son envoi d'e-mails (technique).
-type EventItem = { id: string; title: string };
-
-class SmtpEmailSender {
-  send(to: string, subject: string): void {
-    console.log(`[SMTP - VRAI ENVOI] -> ${to} : ${subject}`);
+// D AVANT (violation) : le métier (Inscription) crée lui-même son outil technique (GmailMailer).
+class GmailMailer {
+  envoyer(destinataire: string, message: string): void {
+    console.log(`[GMAIL - VRAI ENVOI] -> ${destinataire} : ${message}`);
   }
 }
 
-class ReminderService {
-  private sender = new SmtpEmailSender(); // dépendance concrète, cachée
+class Inscription {
+  private mailer = new GmailMailer(); // dépendance CONCRÈTE, cachée à l'intérieur
 
-  remindParticipants(event: EventItem, participants: string[]): number {
-    for (const p of participants) {
-      this.sender.send(p, `Rappel : "${event.title}" commence dans 1 h`);
-    }
-    return participants.length;
+  inscrire(email: string): void {
+    console.log(`Compte créé pour ${email}`);
+    this.mailer.envoyer(email, 'Bienvenue sur EventHub !');
   }
 }
 
-console.log('=== LIVE D - départ ===');
-const sent = new ReminderService().remindParticipants({ id: 'e1', title: 'Meetup React' }, ['alice@example.com', 'bob@example.com']);
-console.log(`${sent} rappels envoyés`);
-// Questions : comment tester sans spammer Alice et Bob ? Comment ajouter les SMS et le push ?
+console.log('=== D AVANT : Inscription fait new GmailMailer() ===');
+new Inscription().inscrire('alice@example.com');
+
+console.log('\nProblème 1 : pour TESTER inscrire(), un vrai mail part. Impossible de mettre un faux.');
+console.log('Problème 2 : passer de Gmail à Brevo = MODIFIER Inscription (le métier).');
+console.log('=> Le haut niveau (métier) dépend du bas niveau (technique). Flèche dans le mauvais sens.');
+
+// -  D Après
+
+interface Mailer {
+  envoyer(destinataire: string, message: string): void;
+}
+
+class Inscription {
+  constructor(private readonly mailer: Mailer) { }
+
+  inscrire(email: string): void {
+    console.log(`Compte créé pour ${email}`);
+    this.mailer.envoyer(email, "Bienvenue sur EventHub !");
+  }
+}
+
+class GmailMailer implements Mailer {
+  envoyer(destinataire: string, message: string) {
+    console.log(`[GMAIL - VRAI ENVOI] -> ${destinataire} : ${message}`);
+  }
+}
+
+new Inscription(new GmailMailer()).inscrire("issa@3wa.fr");
+
+// Faux mail
+const envoyes: string[] = [];
+const fauxMailer: Mailer = {envoyer: (dest)=> {envoyes.push(dest)} };
+new Inscription(fauxMailer).inscrire("test@fake.com")

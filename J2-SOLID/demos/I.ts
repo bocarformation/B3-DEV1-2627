@@ -1,36 +1,63 @@
-// LIVE I - DÉPART (ce qui est à l'écran au début)
-// Une seule grosse interface pour tout le back d'EventHub.
-type User = { id: string; name: string; email: string };
-type EventItem = { id: string; title: string };
+// I AVANT (violation) : une grosse interface. Tout le monde dépend de tout.
+// interface Imprimante {
+//   imprimer(doc: string): string;
+//   scanner(): string;
+//   faxer(numero: string): string;
+// }
 
-interface EventHubApi {
-  login(email: string, password: string): Promise<User>;
-  register(name: string, email: string, password: string): Promise<User>;
-  deleteAccount(userId: string): Promise<void>;
-  listEvents(): Promise<EventItem[]>;
-  createEvent(title: string): Promise<EventItem>;
-  bookEvent(eventId: string, userId: string): Promise<void>;
+// class Multifonction implements Imprimante {
+//   imprimer(doc: string) { return `Impression de "${doc}"`; }
+//   scanner() { return 'Scan OK (scan.pdf)'; }
+//   faxer(numero: string) { return `Fax envoyé au ${numero}`; }
+// }
+
+// // Obligée d'implémenter scanner() et faxer() alors qu'elle ne sait pas le faire...
+// class PetiteImprimante implements Imprimante {
+//   imprimer(doc: string) { return `Impression de "${doc}"`; }
+//   scanner(): string { throw new Error('Je ne sais pas scanner'); }
+//   faxer(): string { throw new Error('Je ne sais pas faxer'); }
+// }
+
+// // Client : le service de numérisation n'utilise QUE scanner()... mais accepte toute Imprimante.
+// function numeriser(machine: Imprimante): string {
+//   return machine.scanner();
+// }
+
+// console.log('=== I AVANT : interface Imprimante à 3 méthodes ===');
+// for (const machine of [new Multifonction(), new PetiteImprimante()]) {
+//   try {
+//     console.log(machine.constructor.name, '->', numeriser(machine));
+//   } catch (e) {
+//     console.log(machine.constructor.name, '-> CRASH :', (e as Error).message);
+//   }
+// }
+// console.log('\nTypeScript n\'a rien dit : le bug n\'apparaît qu\'à l\'exécution.');
+// console.log('=> Des méthodes "throw not supported" = interface trop grosse.');
+
+// I Apres 
+
+interface Imprimante { imprimer(doc: string): string; }
+interface Scanner { scanner(): string; }
+interface Fax { faxer(numero: string): string; }
+
+class Multifonction implements Imprimante, Scanner, Fax {
+  imprimer(doc: string) { return `Impression de "${doc}"`; }
+  scanner() { return 'Scan OK (scan.pdf)'; }
+  faxer(numero: string) { return `Fax envoyé au ${numero}`; }
 }
 
-// Use case "connexion" : il n'utilise QUE login()...
-async function loginUser(api: EventHubApi, email: string, password: string): Promise<string> {
-  const user = await api.login(email, password);
-  return `Bienvenue ${user.name}`;
+class PetiteImprimante implements Imprimante {
+  imprimer(doc: string) { return `Impression de "${doc}"`; }
 }
 
-// ...mais pour le TESTER, je dois fournir un faux avec les 6 méthodes.
-const notImplemented = async (): Promise<never> => {
-  throw new Error('not implemented');
-};
-const fakeApi: EventHubApi = {
-  login: async (email) => ({ id: 'u1', name: 'Alice', email }),
-  register: notImplemented,
-  deleteAccount: notImplemented,
-  listEvents: notImplemented,
-  createEvent: notImplemented,
-  bookEvent: notImplemented,
-};
+const numeriser = (machine: Scanner) => machine.scanner()
+const imprimerFacture = (machine: Imprimante) => machine.imprimer("facture.pdf");
 
-console.log('=== LIVE I - départ ===');
-console.log(await loginUser(fakeApi, 'alice@example.com', 'secret'));
-console.log('Méthodes à écrire dans le faux pour tester loginUser :', Object.keys(fakeApi).length);
+console.log('=== I APRES :  Imprimante / Scanner / Fax ===');
+console.log("Multifonction =>", numeriser(new Multifonction()));
+console.log("Petite Imprimante =>", imprimerFacture(new PetiteImprimante()));
+
+
+// export const uneErreur = () => {
+//   numeriser(new PetiteImprimante());
+// }

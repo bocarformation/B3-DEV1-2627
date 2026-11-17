@@ -1,50 +1,39 @@
-// LIVE L - DÉPART (ce qui est à l'écran au début)
-// Deux gateways implémentent EventGateway. TypeScript est content... et pourtant.
-type EventItem = { id: string; title: string };
+// L AVANT (violation) : le classique Rectangle / Carré.
+// "Un carré EST un rectangle" en maths... mais pas en comportement !
 
-interface EventGateway {
-  /** CONTRAT : renvoie l'événement, ou null s'il n'existe pas. */
-  findById(id: string): Promise<EventItem | null>;
+interface Forme{
+  aire(): number;
+}
+class Rectangle implements Forme{
+  constructor(private largeur: number, private hauteur: number) {}
+  setLargeur(l: number) { this.largeur = l; }
+  setHauteur(h: number) { this.hauteur = h; }
+  aire() { return this.largeur * this.hauteur; }
 }
 
-// Version utilisée dans les tests
-class InMemoryEventGateway implements EventGateway {
-  constructor(private readonly events: EventItem[]) {}
-  async findById(id: string): Promise<EventItem | null> {
-    return this.events.find((e) => e.id === id) ?? null;
-  }
+class Carre implements Forme {
+  constructor(private cote: number) {}
+  setCote(c: number) { this.cote = c;}
+  aire() {return this.cote * this.cote;}
 }
 
-// Version "prod" : simule l'API REST (200 si trouvé, 404 sinon)
-const fakeServer: Record<string, EventItem> = { e1: { id: 'e1', title: 'Meetup React' } };
-async function callApi(path: string): Promise<{ status: number; body: EventItem | null }> {
-  const id = path.split('/').pop() ?? '';
-  const found = fakeServer[id];
-  return found ? { status: 200, body: found } : { status: 404, body: null };
+// Code client écrit pour Rectangle. Il compte sur : "setLargeur ne touche pas la hauteur".
+function redimensionner5x4(r: Rectangle): number {
+  r.setLargeur(5);
+  r.setHauteur(4);
+  return r.aire(); // attendu : 20
 }
 
-class ApiEventGateway implements EventGateway {
-  async findById(id: string): Promise<EventItem | null> {
-    const res = await callApi(`/events/${id}`);
-    if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
-    return res.body;
-  }
-}
+// Code client qui marche avec TOUTES LES FORMES: le contrat de aire() est le même pour tous
+const aireTotale = (formes: Forme[]) => formes.reduce((s, f) => s + f.aire(),0 ); 
 
-// Code client (en EventHub : un use case / un thunk), écrit en lisant le CONTRAT
-async function eventTitle(gateway: EventGateway, id: string): Promise<string> {
-  const event = await gateway.findById(id);
-  return event ? event.title : 'Événement introuvable';
-}
 
-console.log('=== LIVE L - départ ===');
-const gateways: EventGateway[] = [new InMemoryEventGateway([{ id: 'e1', title: 'Meetup React' }]), new ApiEventGateway()];
-for (const gateway of gateways) {
-  console.log(gateway.constructor.name);
-  try {
-    console.log('  e1  ->', await eventTitle(gateway, 'e1'));
-    console.log('  zzz ->', await eventTitle(gateway, 'zzz'));
-  } catch (e) {
-    console.log('  CRASH :', (e as Error).message, '<- et npm run typecheck ne signale RIEN');
-  }
-}
+console.log('=== L APRES : Rectangle et Carré implémentent Forme ===');
+console.log('Rectangle 5x4 :', redimensionner5x4(new Rectangle(1, 1)), '(attendu 20)');
+console.log('=>Aire totale (rect 5x4) + carré 3:', aireTotale([new Rectangle(5,4), new Carre(3)]));
+
+// Jamais exécuté: prouve que le compilateur refuse maintenant le carré à la place du rectangle
+// export const uneErreur = () => {
+  
+//   redimensionner5x4(new Carre(1));
+// }

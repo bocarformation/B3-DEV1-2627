@@ -1,32 +1,28 @@
-// LIVE S - DÉPART (ce qui est à l'écran au début)
-// BookingService d'EventHub : il vérifie, il stocke, il rédige ET envoie le mail. Tout est mélangé.
-type EventItem = { id: string; title: string; capacity: number; booked: number };
-type Booking = { eventId: string; email: string };
+// S AVANT (violation) : une seule classe, mais TROIS personnes peuvent demander de la modifier.
+type Note = { matiere: string; valeur: number };
 
-class BookingService {
-  private events: EventItem[] = [{ id: 'e1', title: 'Meetup React', capacity: 2, booked: 1 }];
-  private bookings: Booking[] = [];
+function calculateAverage(notes: Note[]): number {
+    const total = notes.reduce((somme, n) => somme + n.valeur, 0);
+    return Math.round((total / notes.length) * 10) / 10;
+}
 
-  book(eventId: string, email: string): void {
-    // (a) règles métier
-    const event = this.events.find((e) => e.id === eventId);
-    if (!event) throw new Error('Événement introuvable');
-    if (event.booked >= event.capacity) throw new Error('Complet');
+class BulletinFormatter{
+  formatter(student: string, average: number): string{
 
-    // (b) stockage
-    this.bookings.push({ eventId, email });
-    event.booked++;
-
-    // (c) notification : texte + envoi
-    console.log(`[MAIL -> ${email}] Votre place pour "${event.title}" est confirmée !`);
+    return `Bulletin de ${student} : ${average}/20`;
   }
+
 }
 
-console.log('=== LIVE S - départ ===');
-const service = new BookingService();
-service.book('e1', 'alice@example.com');
-try {
-  service.book('e1', 'bob@example.com');
-} catch (e) {
-  console.log('Refusé :', (e as Error).message);
+class BulletinRepository {
+  save(student: string, average: number): void{
+    console.log(`[BDD] INSERT INTO bulletins VALUES ('${student}', ${average})`);
+  }
+
 }
+
+console.log('=== S APRES : 3 modules ===');
+const notes: Note[] = [{matiere: "TS", valeur: 17}, {matiere: "React", valeur: 18}];
+const moyenne = calculateAverage(notes);
+console.log(new BulletinFormatter().formatter("Berancan", moyenne));
+new BulletinRepository().save("Berancan", moyenne);
