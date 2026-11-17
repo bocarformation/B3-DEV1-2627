@@ -1,0 +1,21 @@
+{
+  "name": "j2-solid",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "S": "tsx demos/S.ts",
+    "O": "tsx demos/O.ts",
+    "L": "tsx demos/L.ts",
+    "I": "tsx demos/I.ts",
+    "D": "tsx demos/D.ts",
+    "exo1": "tsx exos/ex1-gateway/starter.ts",
+    "exo2": "tsx exos/ex2-booking/starter.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

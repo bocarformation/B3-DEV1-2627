@@ -1,0 +1,20 @@
+{
+  // Même logique que la config Vite : ESM + résolution "bundler".
+  // - "type": "module" dans package.json + module esnext  -> pas de TS1295 (import dans un fichier CommonJS)
+  // - moduleResolution "bundler"                          -> pas de TS2835 (imports relatifs sans .js acceptés)
+  // - on lance toujours "npm run typecheck" (tsc lit CE fichier) et jamais "tsc fichier.ts" -> pas de TS5112
+  // - moduleDetection "force"                             -> chaque fichier est un module : pas de conflit de noms entre démos
+  // - lib "dom" volontairement présente (comme dans Vite/React) : c'est elle qui fait apparaître le piège "Notification"
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "lib": ["es2022", "dom"],
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["demos/**/*.ts", "exos/**/*.ts"]
+}
