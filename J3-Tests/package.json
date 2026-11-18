@@ -1,0 +1,44 @@
+{
+  "name": "pollbuilder",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "demos": "vitest run -c vitest.demos.config.ts src/demos/facile",
+    "demo:pure": "vitest run -c vitest.demos.config.ts src/demos/facile/01",
+    "demo:render": "vitest run -c vitest.demos.config.ts src/demos/facile/02",
+    "demo:click": "vitest run -c vitest.demos.config.ts src/demos/facile/03",
+    "demo:mock": "vitest run -c vitest.demos.config.ts src/demos/facile/04",
+    "erreur:getby": "vitest run -c vitest.demos.config.ts src/demos/erreurs/01",
+    "erreur:await": "vitest run -c vitest.demos.config.ts src/demos/erreurs/02",
+    "erreur:act": "vitest run -c vitest.demos.config.ts src/demos/erreurs/03"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.10",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^29.1.1",
+    "oxlint": "^1.90.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}
