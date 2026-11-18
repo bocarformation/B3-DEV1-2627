@@ -1,12 +1,13 @@
 // STARTER : l'affichage est prêt, mais rien n'est branché.
 // Créez vos fichiers dans ce dossier (useCart.ts, cart-context.ts, CartProvider.tsx, useCartContext.ts).
 import { TICKETS, type Ticket } from '../tickets';
-import type { CartLine } from './cart-reducer';
+import { CartProvider } from './CartProvider';
+import { useCartContext } from './useCartContext';
 
 export function CartPage() {
   // TODO étape 3 : tout envelopper dans <CartProvider>
   return (
-    <div>
+    <CartProvider>
       <header className="row">
         <h3>Billetterie EventHub</h3>
         <CartBadge />
@@ -17,13 +18,15 @@ export function CartPage() {
         ))}
       </ul>
       <CartSummary />
-    </div>
+    </CartProvider>
   );
 }
 
 function CartBadge() {
-  const totalTickets = 0; // TODO : depuis le panier
-  const totalPrice = 0; // TODO : depuis le panier
+  // const totalTickets = 0; // TODO : depuis le panier
+  // const totalPrice = 0; // TODO : depuis le panier
+
+  const {totalTickets, totalPrice} = useCartContext();
   return (
     <span className="badge">
       Panier : {totalTickets} billet(s) - {totalPrice} €
@@ -32,7 +35,10 @@ function CartBadge() {
 }
 
 function TicketCard({ ticket }: { ticket: Ticket }) {
-  const quantity = 0; // TODO : quantité de ce billet dans le panier
+  // const quantity = 0; // TODO : quantité de ce billet dans le panier
+
+  const {quantityOf, add, remove} = useCartContext();
+  const quantity = quantityOf(ticket.id);
   return (
     <li className="card">
       <div>
@@ -42,16 +48,18 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
         </div>
       </div>
       <div className="row">
-        <button onClick={() => console.log('TODO retirer', ticket.id)}>-</button>
+        <button disabled={quantity === 0} onClick={() => remove(ticket.id)}>-</button>
         <span>{quantity}</span>
-        <button onClick={() => console.log('TODO ajouter', ticket.id)}>+</button>
+        <button disabled={quantity >= ticket.remaining} onClick={() => add(ticket)}>+</button>
       </div>
     </li>
   );
 }
 
 function CartSummary() {
-  const lines: CartLine[] = []; // TODO : depuis le panier
+  // const lines: CartLine[] = []; // TODO : depuis le panier
+
+  const {lines, totalPrice, clear} = useCartContext(); 
   if (lines.length === 0) return <p className="muted">Votre panier est vide.</p>;
   return (
     <div className="panel">
@@ -62,7 +70,10 @@ function CartSummary() {
           </li>
         ))}
       </ul>
-      <button onClick={() => console.log('TODO vider')}>Vider le panier</button>
+      <p>
+        <strong>Total: {totalPrice} €</strong>
+      </p>
+            <button onClick={() => clear()}>Vider le panier</button>
     </div>
   );
 }
