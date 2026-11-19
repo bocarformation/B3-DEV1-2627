@@ -30,7 +30,7 @@ app.post("/api/chat", async (req, res) => {
         } else {
             const message = body.message ?? body.prompt;
 
-            if (!message.trim() || typeof message !== "string") {
+            if (typeof message !== "string" || !message.trim()) {
                 return res.status(400).json({
                     error: "Message invalide"
                 });
@@ -62,7 +62,7 @@ app.post("/api/chat", async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: "Vous êtes un assistant pédagogique" + "Répondez clairement en français"
+                    content: "Vous êtes un assistant pédagogique. " + "Répondez clairement en français"
                 },
                 ...messages
             ],
